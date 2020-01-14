@@ -1,0 +1,219 @@
+<html>
+<head>
+	<style>
+	*{padding: 0; margin: 25;}
+	canvas{ background: #000000; display: block; margin: 0 auto;}
+	</style>
+</head>
+
+<body>
+<canvas id= "myCanvas" width="500" height="500"></canvas>
+<script type="text/javascript">
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+var snakeX = 250;
+var snakeY = 250;
+var snakeW = 25;
+var snakeH = 25;
+var snakeSpeed = 25;
+var snakeLength = 1;
+var upPressed = false;
+var downPressed = false;
+var leftPressed = false;
+var rightPressed = false;
+var gridSquareW = 25;
+var gridSquareH = 25;
+var gridW = 20;
+var gridH = 20;
+var isGameOver = false;
+var gameOverCounter = 0;
+
+function keyDownHandler(e)
+{
+	if(e.keyCode == 38)
+	{ 
+		upPressed = true;
+	}
+	else if(e.keyCode == 40)
+	{ 
+		downPressed = true;
+	}
+	if(e.keyCode == 37)
+	{ 
+		leftPressed = true; 
+	}
+	else if(e.keyCode == 39)
+	{ 
+		rightPressed = true; 
+	}
+}
+
+function keyUpHandler(e)
+{
+	if(e.keyCode == 38)
+	{
+		upPressed = false;
+	}
+	else if(e.keyCode == 40)
+	{
+		downPressed = false;
+	}
+	if(e.keyCode == 37)
+	{
+		leftPressed = false;
+	}
+	else if(e.keyCode == 39)
+	{
+		rightPressed = false;
+	}
+}
+
+function drawSnake()
+{
+	ctx.fillStyle = "rgb(0, 204, 0)";
+	ctx.strokeStyle = "rgb(0, 0, 0)";
+	ctx.fillRect(snakeX, snakeY, snakeW, snakeH);
+	ctx.strokeRect(snakeX, snakeY, snakeW, snakeH);
+	ctx.fill;
+	ctx.stroke;
+}
+
+function snakeMovement()
+{
+	if(upPressed == true)
+	{	
+		snakeY = snakeY - 25;
+	}
+	if(downPressed == true)
+	{
+		snakeY = snakeY + 25;
+	}
+	if(leftPressed == true)
+	{
+		snakeX = snakeX - 25;
+		//Had 'snakeX - 25' written as 'snakeX - 1' because when the refresh rate was higher (2), 1 was a reasonable speed for the snake to move at.
+		//When I lowered the refresh rate, I increased 'snakeY - 1' to 'snakeY - 25' to repesent that it should move one snake cell each time it moved.
+		//I forgot to do this for horizontal movement however, and as such my snake moved so slowly left and right I didn't think it was moving at all.
+		//I fixed this by replacing "25" with snakeW and snakeH so I couldn't forget to do that next time. (The same applies to 'snakeX + 25')
+	}
+	if(rightPressed == true)
+	{
+		snakeX = snakeX + 25;
+		//Had 'snakeX + 25' written as 'snakeX + 1' because when the refresh rate was higher (2), 1 was a reasonable speed for the snake to move at.
+		//When I lowered the refresh rate, I increased 'snakeY - 1' to 'snakeY - 25' to repesent that it should move one snake cell each time it moved.
+		//I forgot to do this for horizontal movement however, and as such my snake moved so slowly to the right I didn't think it was moving at all.
+		//I fixed this by replacing both the 1s and 25s with snakeW and snakeH so I couldn't forget to do that next time. (The same applies to 'snakeX - 25') true)
+		
+	}
+}
+
+function getRandomInt(min, max) 
+{
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function appleLocation(appleX, appleY, appleW, appleH, isEaten)
+{
+	this.x = appleX;
+	this.y = appleY;
+	this.w = appleW;
+	this.h = appleH;
+	this.isEaten = isEaten;
+	this.r = 255;
+	this.g = 0;
+	this.b = 0;
+}
+
+var applePosition = [];
+for(var i = 0; i < 19; i++)
+{	
+	applePosition[i] = [];
+	for(var j = 0; j < 19; j++)
+	{
+		var appleX = (getRandomInt(1, 19) * 25)
+		var appleY = (getRandomInt(1, 19) * 25)
+		var appleW = 25;
+		var appleH = 25;
+		applePosition[i][j] = new appleLocation(appleX, appleY, appleW, appleH, false);
+	}
+}
+
+function drawApple()
+{
+	ctx.fillStyle = "rgb(255, 0, 0)"
+	ctx.strokeStyle = "rgb(0, 0, 0)";
+	ctx.fillRect(appleX, appleY, 25, 25);
+    ctx.strokeRect(appleX, appleY, 25, 25);
+	ctx.fill;
+	ctx.stroke;
+}
+
+function drawScore()
+{
+	ctx.fillStyle = "rgb (255, 255, 255)"; 
+	ctx.font = "30px Arial";
+	ctx.fillText("Length: " + snakeLength, 500, 30);
+}
+
+function collision()
+{
+	if(snakeX < 0 || snakeX > 500 - snakeW)
+	{
+		isGameOver = true;
+		snakeX = 250;
+		snakeY = 250;
+		snakeLength = 1;
+	}
+	if(snakeY < 0 || snakeY > 500 - snakeH)
+	{
+		isGameOver = true;
+		snakeX = 250;
+		snakeY = 250;
+		snakeLength = 1;
+	}
+	if(snakeX == appleX && snakeY == appleY)
+	{
+		isEaten = true
+		snakeLength += 1;
+		console.log("Snake length: " + snakeLength)
+		appleX = snakeX;
+		appleY = snakeY;
+	}
+}
+
+function draw()
+{
+	if(!isGameOver)
+	{
+		ctx.clearRect(0, 0, 500, 500)
+		drawSnake();
+		snakeMovement();
+		drawApple();
+		drawScore();
+		collision();
+	}
+	else
+	{
+		ctx.fillStyle = "rgb (255, 255, 255)"; 
+		ctx.font = "30px Arial";
+		ctx.fillText("Game Over", 175, 200);
+		gameOverCounter++;
+		if(gameOverCounter > 20)
+		{
+			isGameOver = false;
+			gameOverCounter = 0;
+			snakeLength = 1;
+		}
+	}
+}
+
+setInterval(draw, 100);
+
+</script>
+</body>
+</html>
